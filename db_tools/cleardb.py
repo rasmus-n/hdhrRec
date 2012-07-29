@@ -12,7 +12,11 @@ db.execute('DROP TABLE IF EXISTS rules')
 db.execute('CREATE TABLE rules (ch text, title text, subtitle text, description text)')
 db.execute('INSERT INTO rules(title) VALUES ("The Daily Show")')
 db.execute('INSERT INTO rules(title) VALUES ("Deadline")')
+db.execute('INSERT INTO rules(title) VALUES ("Storrygeren%")')
+db.execute('INSERT INTO rules(title) VALUES ("Jimmys madfabrik%")')
 db.execute('INSERT INTO rules(subtitle) VALUES ("%thriller%")')
+db.execute('INSERT INTO rules(subtitle) VALUES ("%krimi%")')
+
 
 db.execute('DROP TABLE IF EXISTS rec')
 db.execute('CREATE TABLE rec (ch_tag text, st datetime, et datetime, title text, rid number)')

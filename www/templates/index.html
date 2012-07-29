@@ -1,0 +1,12 @@
+$def with (plan)
+
+<html>
+
+$for ch in plan:
+  <p>
+  $ch<br><hr>
+  $for program in plan[ch]:
+    $program['title']
+      <br>
+  </p>
+</html>

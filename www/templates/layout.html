@@ -1,0 +1,42 @@
+$def with (content)
+<html>
+<head>
+      <style type="text/css">
+      span.table {
+        border: 1px solid black;
+      }
+      span.table_cell_wide {
+        display: inline-block;
+        width: 24em;
+      }
+      span.table_cell_small {
+        display: inline-block;
+        width: 6em;
+      }
+      span.table_cell {
+        display: inline-block;
+        width: 12em;
+      }
+      span.table_row:hover {
+        background-color: lightblue;
+      }
+      span.table_head {
+        background-color: lightblue;
+        border-bottom: 1px solid black;
+      }
+    </style>
+
+    <title>HDHomeRun Recorder</title>
+</head>
+<body>
+  <p><div class='menu'>
+    <a href='/'>HOME</a> -
+    <a href='/rec'>REC</a> -
+    <a href='/rules'>RULES</a> -
+    <a href='/streams'>STREAMS</a>
+  </div></p>
+  
+$:content
+
+</body>
+</html>

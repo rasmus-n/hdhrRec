@@ -1,0 +1,19 @@
+$def with (streams)
+
+  <span class='table_head'>
+    <span class='table_cell_small'>Name</span>
+    <span class='table_cell_small'>Channel</span>
+    <span class='table_cell_small'>VID</span>
+    <span class='table_cell_small'>AID</span>
+    <span class='table_cell_small'>SID</span>
+    <span class='table_cell_small'>PID</span>
+  </span><br>
+$for stream in streams:
+  <span class='table_row' onclick="location.href='/streams/$stream['rowid']'">
+  <span class='table_cell_small'>$stream['ch_tag']</span>
+  <span class='table_cell_small'>$stream['ch_nr']</span>
+  <span class='table_cell_small'>$stream['vid']</span>
+  <span class='table_cell_small'>$stream['aid']</span>
+  <span class='table_cell_small'>$stream['sid']</span>
+  <span class='table_cell_small'>$stream['pid']</span>
+  </span><br>
