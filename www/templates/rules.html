@@ -3,15 +3,13 @@ $def with (rules)
   <span class='table_head'>
     <span class='table_cell_small'>Channel</span>
     <span class='table_cell'>Title</span>
-    <span class='table_cell'>Subtitle</span>
     <span class='table_cell'>Description</span>
   </span><br>
 $for rule in rules:
   <span class='table_row' onclick="location.href='/rules/$rule['rowid']'">
-  <span class='table_cell_small'>$rule['ch']</span>
-  <span class='table_cell'>$rule['title']</span>
-  <span class='table_cell'>$rule['subtitle']</span>
-  <span class='table_cell'>$rule['description']</span>
+  <span class='table_cell_small'>$rule['channel_name']</span>
+  <span class='table_cell'>$rule['program_title']</span>
+  <span class='table_cell'>$rule['program_description']</span>
   </span><br>
 </p>
 <p>

@@ -55,15 +55,28 @@ for channel in channels:
     dbdata = []
     ts = datetime.now()
     for program in programs:
-      title = program['pro_title']
-      subtitle = program.get('ppu_punchline')
-      description = program.get('ppu_description')
-      st = datetime.strptime(program['pg_start'][:18], dateFormatDR)
-      et = datetime.strptime(program['pg_stop'][:18], dateFormatDR)
-      if et > now:
-        dbdata.append((channel, st, et, title, subtitle, description))
+      d=[]
+      d.append(channel)
+      d.append(program['pro_title'])
+      d.append(datetime.strptime(program['pg_start'][:18], dateFormatDR))
+      d.append(datetime.strptime(program['pg_stop'][:18], dateFormatDR))
+      des = None
+      if program.has_key('ppu_punchline'):
+        des = program['ppu_punchline']
+        if program.has_key('ppu_description'):
+          des = "%s\n%s" % (des, program['ppu_description'])
+      elif program.has_key('ppu_description'):
+        des = program['ppu_description']
+        
+      d.append(des)
+      if d[3] > now: # 3 = end
+        dbdata.append(d)
     
-    db.execute('DELETE FROM plan WHERE ch=?', (channel,))
-    db.executemany('INSERT INTO plan VALUES (?, ?, ?, ?, ?, ?)', dbdata)
+    db.execute('DELETE FROM programs WHERE channel_name=?', (channel,))
+#    s = "INSERT INTO programs(channel_name, title, start, end, description"
+    db.executemany('INSERT INTO programs(channel_name, title, start, end, description) VALUES (?, ?, ?, ?, ?)', dbdata)
     db.commit()
-
+    
+now = datetime.now()
+db.execute('UPDATE table_update_times SET programs=?', (now,))
+db.commit()

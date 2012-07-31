@@ -15,6 +15,8 @@
 #define FALSE 0
 #define TRUE 1
 
+#define MESSAGE_THRESHOLD 0
+
 /* TYPES */
 
 typedef struct prgcfg_t{
@@ -147,10 +149,9 @@ hdhr_stop(PyObject *self, PyObject *args)
   get_recording(&h)->fd = NULL;
   tun = get_tuner(&h);
   tun->active--;
-  printf("act: %d\n", tun->active);
   if(tun->active < 1)
   {
-    printf("Stopping tuner %d\n", h.idx.tun);
+    printf("Stopping tuner%d\n", h.idx.tun);
     hdhr_device = hdhomerun_device_create(tun->device_id, 0, tun->index, NULL);
     hdhomerun_device_set_tuner_channel(hdhr_device, "none");
     hdhomerun_device_set_tuner_target(hdhr_device, "none");
@@ -210,7 +211,7 @@ hdhr_run(PyObject *self, PyObject *args)
           {
             while((bufptr[++i] != 0x47) && (i < 2 * TS_PACKET_SIZE))
             {
-              printf ("sync...\n");
+              printf (".");
             }
           }
           while(((bufptr[i + TS_PACKET_SIZE] != 0x47) || (bufptr[i + 2 * TS_PACKET_SIZE] != 0x47)) && (i < 2 * TS_PACKET_SIZE));
@@ -277,7 +278,7 @@ uint16_t get_available_recorder_handle(prgcfg_t *cfg)
       {
         if (get_recording(&h)->cfg.pid == 0)
         {
-          printf("Using free recording slot on tuner %d\n", h.idx.tun);
+          printf("Using free recording slot on tuner%d\n", h.idx.tun);
           memcpy(&get_recording(&h)->cfg, cfg, sizeof(prgcfg_t));
           return h.id;
         }
@@ -292,7 +293,7 @@ uint16_t get_available_recorder_handle(prgcfg_t *cfg)
     tun = get_tuner(&h);
     if (tun->ch == 0)
     {
-      printf("Starting tuner %d\n", h.idx.tun);
+      printf("Starting tuner%d\n", h.idx.tun);
       memcpy(&get_recording(&h)->cfg, cfg, sizeof(prgcfg_t));
       tun->ch = cfg->ch;
       hdhr_device = hdhomerun_device_create(tun->device_id, 0, tun->index, NULL);
@@ -337,6 +338,14 @@ hdhr_set_callback(PyObject *dummy, PyObject *args)
         Py_RETURN_NONE;
     }
     return NULL;
+}
+
+void message(char *message, int level)
+{
+  if (level >= MESSAGE_THRESHOLD)
+  {
+    printf(message);
+  }
 }
 
 /* PYTHON STUFF */

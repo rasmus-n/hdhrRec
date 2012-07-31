@@ -1,14 +1,14 @@
-$def with (recs)
+$def with (recordings)
 
   <span class='table_head'>
     <span class='table_cell_small'>Time</span>
     <span class='table_cell_small'>Channel</span>
     <span class='table_cell_wide'>Title</span>
   </span><br>
-$for rec in recs:
-  <span class='table_row' onclick="location.href='/rec/$rec['rowid']'">
-  <span class='table_cell_small'>$rec['st'][11:-3]</span>
-  <span class='table_cell_small'>$rec['ch_tag']</span>
-  <span class='table_cell_wide'>$rec['title']</span>
+$for recording in recordings:
+  <span class='table_row' onclick="location.href='/rec/$recording['rowid']'">
+  <span class='table_cell_small'>$recording['program_start'][11:-3]</span>
+  <span class='table_cell_small'>$recording['channel_name']</span>
+  <span class='table_cell_wide'>$recording['program_title']</span>
   </span><br>
 

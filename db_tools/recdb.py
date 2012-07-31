@@ -14,11 +14,10 @@ def dict_factory(cursor, row):
 db = sql.connect('tv.sqlite')
 db.row_factory = dict_factory
 
-#db.execute('DELETE FROM rec')
 now = datetime.now()
 
-db.execute('DELETE FROM plan WHERE et < ?', (now,))
-db.execute('DELETE FROM rec WHERE et < ?', (now,))
+db.execute('DELETE FROM programs WHERE end < ?', (now,))
+db.execute('DELETE FROM recordings WHERE program_end < ?', (now,))
 db.commit()
 
 rules = db.execute('SELECT * FROM rules')
@@ -26,20 +25,22 @@ rules = db.execute('SELECT * FROM rules')
 for rule in rules:
   keys = ""
   for key in rule.keys():
-    if keys:
-      keys = keys + "AND "
-    keys = keys + "%s LIKE :%s " % (key, key)
-  query = 'SELECT * FROM plan WHERE %s' % (keys)
+    if "program_" in key:
+      programs_key = key[8:]
+      if keys:
+        keys = keys + "AND "
+      keys = keys + "%s LIKE :%s " % (programs_key, key)
+  query = 'SELECT * FROM programs WHERE %s' % (keys)
   programs = db.execute(query, rule)
 
   for program in programs:
-    l = len(db.execute('SELECT * FROM rec WHERE ch_tag = :ch AND st = :st', program).fetchall())
+    l = len(db.execute('SELECT * FROM recordings WHERE (channel_name = :channel_name AND program_start = :start)', program).fetchall())
     if l == 0:
-      db.execute('INSERT INTO rec(ch_tag,st,et,title) VALUES (:ch, :st, :et, :title)', program)
+      db.execute('INSERT INTO recordings(channel_name,program_title,program_start,program_end) VALUES (:channel_name, :title, :start, :end)', program)
     elif l > 1:
       print 'Error!'
 
 db.commit()
 
-for r in db.execute('SELECT * FROM rec'):
+for r in db.execute('SELECT * FROM recordings'):
   print r

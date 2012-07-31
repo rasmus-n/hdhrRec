@@ -15,7 +15,6 @@ db = web.database(dbn='sqlite', db='../tv.sqlite')
 add_rule_form = form.Form (
   form.Textbox('ch', description='Channel'),
   form.Textbox('title', description='Title'),
-  form.Textbox('subtitle', description='Subtitle'),
   form.Textbox('description', description='Description'),
 )
 
@@ -23,7 +22,7 @@ urls = (
   '/'           , 'start',
   '/streams'    , 'streams',
   '/rules'      , 'rules',
-  '/rules/add'  , 'add_rule',
+  '/rules/add'  , 'rule_add',
   '/rec'        , 'rec',
 )
 
@@ -31,16 +30,15 @@ class start:
   def GET(self):
     now = datetime.now()
     plan = {}
-    ch_tags = db.select('streams', what='ch_tag')
-    for tag in ch_tags:
-      d=dict(ch=tag['ch_tag'], t=now)
-      plan[tag.ch_tag] = db.select("plan", d, where='(ch = $ch) AND (et > $t)')
-    print plan
+    channels = db.select('channels', what='name')
+    for channel in channels:
+      d=dict(channel=channel['name'], time=now)
+      plan[channel['name']] = db.select("programs", d, where='(channel_name = $channel) AND (end > $time)')
     return render.index(plan)
 
 class streams:
   def GET(self):
-    streams = db.select('streams', what='rowid,*')
+    streams = db.select('channels', what='rowid,*')
     return render.streams(streams)
     
 class rules:
@@ -48,7 +46,7 @@ class rules:
     rules = db.select('rules', what='rowid,*')
     return render.rules(rules)
 
-class add_rule:
+class rule_add:
   def GET(self):
     f = add_rule_form()
     return render.add_rule(f)
@@ -58,13 +56,14 @@ class add_rule:
     f = add_rule_form()
     if f.validates():
       db.insert('rules', **f.d)
+      db.update('table_update_times', rules=datetime.now())
       raise web.seeother('/rules')
     else:
       return render.add_rule(f)
 
 class rec:
   def GET(self):
-    rec = db.select('rec', what='rowid,*', order='st')
+    rec = db.select('recordings', what='rowid,*', order='program_start')
     return render.rec(rec)
 
 app = web.application(urls, globals())
