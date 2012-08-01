@@ -1,15 +1,21 @@
 $def with (rules)
 <p>
   <span class='table_head'>
+    <span class='table_cell_small'>Name</span>
     <span class='table_cell_small'>Channel</span>
     <span class='table_cell'>Title</span>
     <span class='table_cell'>Description</span>
+    <span class='table_cell_small'>Profile</span>
+    <span class='table_cell_small'>Weight</span>
   </span><br>
 $for rule in rules:
-  <span class='table_row' onclick="location.href='/rules/$rule['rowid']'">
+  <span class='table_row' onclick="location.href='/rules/edit/$rule['rowid']'">
+    <span class='table_cell_small'>$rule['name']</span>
   <span class='table_cell_small'>$rule['channel_name']</span>
   <span class='table_cell'>$rule['program_title']</span>
   <span class='table_cell'>$rule['program_description']</span>
+  <span class='table_cell_small'>$rule['profile_name']</span>
+  <span class='table_cell_small'>$rule['weight']</span>
   </span><br>
 </p>
 <p>

@@ -1,0 +1,19 @@
+$def with (profiles)
+<p>
+  <span class='table_head'>
+    <span class='table_cell_small'>Name</span>
+    <span class='table_cell'>Format</span>
+    <span class='table_cell_small'>Pre rec.</span>
+    <span class='table_cell_small'>Post rec.</span>
+  </span><br>
+$for profile in profiles:
+  <span class='table_row' onclick="location.href='/profiles/edit/$profile['rowid']'">
+  <span class='table_cell_small'>$profile['name']</span>
+  <span class='table_cell'>$profile['format']</span>
+  <span class='table_cell_small'>$profile['pre_record']</span>
+  <span class='table_cell_small'>$profile['post_record']</span>
+  </span><br>
+</p>
+<p>
+  <input type='button' value='Add profile' onclick="location.href='/profiles/add'">
+</p>
