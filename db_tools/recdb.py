@@ -38,7 +38,7 @@ for r in p:
   d = p[r]
   profile = db.execute('SELECT * FROM profiles WHERE name = ?', (d['profile_name'],)).fetchone()
   d['start'] = datetime.strptime(d['start'], "%Y-%m-%d %H:%M:%S") - timedelta(minutes=profile['pre_record'])
-  d['end'] = datetime.strptime(d['end'], "%Y-%m-%d %H:%M:%S") - timedelta(minutes=profile['post_record'])
+  d['end'] = datetime.strptime(d['end'], "%Y-%m-%d %H:%M:%S") + timedelta(minutes=profile['post_record'])
   if d['weight'] > 0:
     l = len(db.execute('SELECT * FROM recordings WHERE (channel_name = :channel_name AND program_start = :start)', d).fetchall())
     #TODO: Support update

@@ -8,6 +8,7 @@ code = locale.getpreferredencoding()
 import hdhr
 import sqlite3 as sql
 from datetime import datetime, timedelta
+from subprocess import Popen
 
 video_root = "/home/rn/tv/"
 
@@ -32,6 +33,7 @@ def my_callback():
   
   if table_update_times['programs'] < str(now - timedelta(hours=12)):
     print "Updating program table..."
+    Popen('./db_tools/tvdb.py')
     
   if table_update_times['programs'] > table_update_times['recordings']:
     print "Program table updated"
@@ -43,6 +45,7 @@ def my_callback():
 
   if update_rec:
     print "Updating recording table"
+    Popen('./db_tools/recdb.py')
     db.execute('UPDATE table_update_times SET recordings=?', (now,))
     db.commit()
     
@@ -66,7 +69,7 @@ def my_callback():
   db.execute('DELETE FROM recordings WHERE (program_end < ?)', (now,))
   db.commit()
     
-
+hdhr.set_recorder_ip("10.0.0.3")
 hdhr.install_tuner(0x122004D5, 0)
 hdhr.install_tuner(0x122004D5, 1)
 

@@ -7,7 +7,7 @@
 #define PORT_OFFSET 3300
 
 #define TS_PACKET_SIZE 188
-#define RX_BUFFER_SIZE 20*TS_PACKET_SIZE
+#define RX_BUFFER_SIZE 21*TS_PACKET_SIZE
 
 #define MAX_NUMBER_OF_TUNERS 4
 #define RECORDINGS_PER_TUNER 2
@@ -57,6 +57,7 @@ typedef struct tuner_t{
 tuner_t *tuner[MAX_NUMBER_OF_TUNERS];
 uint8_t installed_tuners = 0;
 static PyObject *my_callback = NULL;
+char target_ip[16] = "10.0.0.3";
 
 /* PROTOTYPES */
 
@@ -68,19 +69,36 @@ tuner_t *get_tuner(handle_t *h);
 /* IMPLEMENTATION */
 
 static PyObject *
+hdhr_set_recorder_ip(PyObject *self, PyObject *args)
+{
+  static char* temp;
+  
+  if (!PyArg_ParseTuple(args, "s", &temp))
+  {
+    return NULL;
+  }
+  strcpy(target_ip, temp);
+//  printf("%s\n", target_ip);
+  
+  Py_RETURN_NONE;
+    
+}
+
+static PyObject *
 hdhr_install_tuner(PyObject *self, PyObject *args)
 {
-  uint32_t id;
-  uint16_t index;
+  int32_t id;
+  int32_t index;
+  int rx_size;
 
   struct sockaddr_in serveraddr;
   tuner_t *new_tuner;
 
-  if (!PyArg_ParseTuple(args, "ii", &id, &index))
+  if (!PyArg_ParseTuple(args, "ll", &id, &index)) // should be "ki", but does not work
   {
     return NULL;
   }
-
+//  printf("%lX\n", id);
   new_tuner = (tuner_t*) malloc(sizeof(tuner_t));
   memset(new_tuner, 0, sizeof(tuner_t));
   
@@ -94,6 +112,8 @@ hdhr_install_tuner(PyObject *self, PyObject *args)
     perror("UDP server - socket() error");
     exit(-1);
   }
+  rx_size = 524288;
+  setsockopt(new_tuner->socket, SOL_SOCKET, SO_RCVBUF, (char *)&rx_size, sizeof(int));
 
   /* bind to address */
   memset(&serveraddr, 0x00, sizeof(serveraddr));
@@ -129,7 +149,7 @@ hdhr_record(PyObject *self, PyObject *args)
   h.id = get_available_recorder_handle(&cfg);
   get_recording(&h)->fd = fopen(filename, "wb");
   get_tuner(&h)->active++;
-  printf("act: %d\n", get_tuner(&h)->active);
+//  printf("act: %d\n", get_tuner(&h)->active);
   return Py_BuildValue("H", h.id);
 }
 
@@ -177,6 +197,10 @@ hdhr_run(PyObject *self, PyObject *args)
   uint8_t ti = 0;
   handle_t h;
   static int32_t next_callback_time = 0;
+  int skew = 0;
+  
+  PyObject_CallObject(my_callback, NULL);
+  next_callback_time = time(NULL) + 10;
   
   while(1){
     timeout.tv_sec = 10;
@@ -205,7 +229,11 @@ hdhr_run(PyObject *self, PyObject *args)
         if (FD_ISSET(sc, &fds))
         {
           rc = recvfrom(sc, bufptr, buflen, 0, NULL, NULL);
-
+          skew = rc % TS_PACKET_SIZE;
+          if (skew)
+          {
+            printf("num: %d skew: %d\n", rc / TS_PACKET_SIZE, skew);          
+          }
           i = -1;
           do
           {
@@ -215,8 +243,8 @@ hdhr_run(PyObject *self, PyObject *args)
             }
           }
           while(((bufptr[i + TS_PACKET_SIZE] != 0x47) || (bufptr[i + 2 * TS_PACKET_SIZE] != 0x47)) && (i < 2 * TS_PACKET_SIZE));
-          
-          while (i < (buflen - TS_PACKET_SIZE))
+ 
+          while (i <= (rc - TS_PACKET_SIZE))
           {
             handlePacket(&h, bufptr+i);
             i += TS_PACKET_SIZE;
@@ -254,10 +282,12 @@ void handlePacket(handle_t *h, uint8_t *data)
       {
         if (rec->fd != NULL)
         {
-          fwrite(data, 1, TS_PACKET_SIZE, rec->fd);
+          fwrite(data, TS_PACKET_SIZE, 1, rec->fd);
         }
       }
     }
+  }else{
+    printf("m");
   }
 }
 
@@ -298,10 +328,12 @@ uint16_t get_available_recorder_handle(prgcfg_t *cfg)
       tun->ch = cfg->ch;
       hdhr_device = hdhomerun_device_create(tun->device_id, 0, tun->index, NULL);
       sprintf(string, "%d", tun->ch);
+//      printf("%x\n", hdhomerun_device_get_device_ip(hdhr_device));
       hdhomerun_device_set_tuner_channel(hdhr_device, string);
       hdhomerun_device_set_tuner_filter(hdhr_device, "none");
       hdhomerun_device_set_tuner_program(hdhr_device, "0");
-      sprintf(string, "10.0.0.3:%d", tun->port);
+      sprintf(string, "%s:%d", target_ip, tun->port);
+//      printf("%s\n", string);
       hdhomerun_device_set_tuner_target(hdhr_device, string);
       hdhomerun_device_destroy(hdhr_device);
       return h.id;
@@ -340,6 +372,8 @@ hdhr_set_callback(PyObject *dummy, PyObject *args)
     return NULL;
 }
 
+
+
 void message(char *message, int level)
 {
   if (level >= MESSAGE_THRESHOLD)
@@ -352,6 +386,7 @@ void message(char *message, int level)
 
 static PyMethodDef hdhr_methods[] =
 {
+  {"set_recorder_ip", hdhr_set_recorder_ip, METH_VARARGS, "Test"},
   {"install_tuner", hdhr_install_tuner, METH_VARARGS, "Test"},
   {"set_callback", hdhr_set_callback, METH_VARARGS, "Test"},
   {"record", hdhr_record, METH_VARARGS, "Test"},
