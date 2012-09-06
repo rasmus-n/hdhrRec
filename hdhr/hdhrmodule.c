@@ -18,7 +18,6 @@
 #define MESSAGE_THRESHOLD 0
 
 #define UPD_RX_BUFFER 8388608
-//1048576
 
 /* TYPES */
 
