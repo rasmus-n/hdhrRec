@@ -10,12 +10,15 @@
 #define RX_BUFFER_SIZE 21*TS_PACKET_SIZE
 
 #define MAX_NUMBER_OF_TUNERS 4
-#define RECORDINGS_PER_TUNER 2
+#define RECORDINGS_PER_TUNER 4
 
 #define FALSE 0
 #define TRUE 1
 
 #define MESSAGE_THRESHOLD 0
+
+#define UPD_RX_BUFFER 8388608
+//1048576
 
 /* TYPES */
 
@@ -89,7 +92,8 @@ hdhr_install_tuner(PyObject *self, PyObject *args)
 {
   int32_t id;
   int32_t index;
-  int rx_size;
+  int32_t rx_size;
+  socklen_t optlen;
 
   struct sockaddr_in serveraddr;
   tuner_t *new_tuner;
@@ -112,8 +116,14 @@ hdhr_install_tuner(PyObject *self, PyObject *args)
     perror("UDP server - socket() error");
     exit(-1);
   }
-  rx_size = 524288;
-  setsockopt(new_tuner->socket, SOL_SOCKET, SO_RCVBUF, (char *)&rx_size, sizeof(int));
+
+  rx_size = UPD_RX_BUFFER;
+  setsockopt(new_tuner->socket, SOL_SOCKET, SO_RCVBUF, (char *)&rx_size, sizeof(int32_t));
+  
+  rx_size = 0;
+  optlen = sizeof(int32_t);
+  getsockopt(new_tuner->socket, SOL_SOCKET, SO_RCVBUF, (char *)&rx_size, &optlen);
+  printf("rx: %ld\n", rx_size);
 
   /* bind to address */
   memset(&serveraddr, 0x00, sizeof(serveraddr));
