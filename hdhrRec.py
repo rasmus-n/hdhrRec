@@ -48,26 +48,32 @@ def my_callback():
     Popen('./db_tools/recdb.py')
     db.execute('UPDATE table_update_times SET recordings=?', (now,))
     db.commit()
-    
-  r = db.execute('SELECT recordings.rowid,* FROM recordings,channels,profiles WHERE (recordings.channel_name=channels.name) AND (recordings.profile_name = profiles.name) AND (program_start < ?) AND (program_end > ?) AND (id ISNULL)', (now,now))
-  for p in r:
-    print "Start recording: %s" % p['program_title']
-    file_path = "/home/rn/tv/%s" % p['format']
-    file_path = file_path.replace('\\title', p['program_title'])
-    file_path = file_path.replace('\date', now.strftime("%Y-%m-%d"))
-    file_path = file_path.replace('\\time', now.strftime("%H%M"))
 
-    record_id = hdhr.record(p['mux'], p['video'], p['audio'], p['subtitles'], p['pid'], file_path.encode(code))
-    db.execute('UPDATE recordings SET id=? WHERE rowid=?', (record_id,p['rowid']))
-    db.commit()
+  try:
+    r = db.execute('SELECT rowid,id,program_title FROM recordings WHERE (program_end < ?) AND (id NOTNULL)', (now,))
+    for p in r:
+      print "End recording: %s" % (p['program_title'])
+      hdhr.stop(p['id'])
+      db.execute('DELETE FROM recordings WHERE (rowid=?)', (p['id'],))
+      db.commit()
+  except:
+    print "Error A: %s" % (now)
 
-  r = db.execute('SELECT rowid,id,program_title FROM recordings WHERE (program_end < ?) AND (id NOTNULL)', (now,))
-  for p in r:
-    print "End recording: %s" % (p['program_title'])
-    hdhr.stop(p['id'])
+  try:
+    r = db.execute('SELECT recordings.rowid,* FROM recordings,channels,profiles WHERE (recordings.channel_name=channels.name) AND (recordings.profile_name = profiles.name) AND (program_start < ?) AND (program_end > ?) AND (id ISNULL)', (now,now))
+    for p in r:
+      print "Start recording: %s" % p['program_title']
+      file_path = "/home/rn/tv/%s" % p['format']
+      file_path = file_path.replace('\\title', p['program_title'])
+      file_path = file_path.replace('\date', now.strftime("%Y-%m-%d"))
+      file_path = file_path.replace('\\time', now.strftime("%H%M"))
+
+      record_id = hdhr.record(p['mux'], p['video'], p['audio'], p['subtitles'], p['pid'], file_path.encode(code))
+      db.execute('UPDATE recordings SET id=? WHERE rowid=?', (record_id,p['rowid']))
+      db.commit()
+  except:
+    print "Error B: %s" % (now)
     
-  db.execute('DELETE FROM recordings WHERE (program_end < ?)', (now,))
-  db.commit()
     
 hdhr.set_recorder_ip("10.0.0.3")
 hdhr.install_tuner(0x122004D5, 0)
