@@ -54,7 +54,7 @@ def my_callback():
     for p in r:
       print "End recording: %s" % (p['program_title'])
       hdhr.stop(p['id'])
-      db.execute('DELETE FROM recordings WHERE (rowid=?)', (p['id'],))
+      db.execute('DELETE FROM recordings WHERE (id=?)', (p['id'],))
       db.commit()
   except:
     print "Error A: %s" % (now)
@@ -63,7 +63,7 @@ def my_callback():
     r = db.execute('SELECT recordings.rowid,* FROM recordings,channels,profiles WHERE (recordings.channel_name=channels.name) AND (recordings.profile_name = profiles.name) AND (program_start < ?) AND (program_end > ?) AND (id ISNULL)', (now,now))
     for p in r:
       print "Start recording: %s" % p['program_title']
-      file_path = "/home/rn/tv/%s" % p['format']
+      file_path = "%s/%s" % (video_root, p['format'])
       file_path = file_path.replace('\\title', p['program_title'])
       file_path = file_path.replace('\date', now.strftime("%Y-%m-%d"))
       file_path = file_path.replace('\\time', now.strftime("%H%M"))

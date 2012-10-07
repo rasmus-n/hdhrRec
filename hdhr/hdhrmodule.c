@@ -174,6 +174,7 @@ hdhr_stop(PyObject *self, PyObject *args)
     return NULL;
   }
   
+  fclose(get_recording(&h)->fd);
   memset(get_recording(&h), 0, sizeof(recording_t));
   get_recording(&h)->fd = NULL;
   tun = get_tuner(&h);
