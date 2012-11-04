@@ -173,22 +173,25 @@ hdhr_stop(PyObject *self, PyObject *args)
   {
     return NULL;
   }
-  
-  fclose(get_recording(&h)->fd);
-  memset(get_recording(&h), 0, sizeof(recording_t));
-  get_recording(&h)->fd = NULL;
-  tun = get_tuner(&h);
-  tun->active--;
-  if(tun->active < 1)
+
+  if (get_recording(&h)->fd != NULL)
   {
-    printf("Stopping tuner%d\n", h.idx.tun);
-    hdhr_device = hdhomerun_device_create(tun->device_id, 0, tun->index, NULL);
-    hdhomerun_device_set_tuner_channel(hdhr_device, "none");
-    hdhomerun_device_set_tuner_target(hdhr_device, "none");
-    hdhomerun_device_destroy(hdhr_device);
-    
-    tun->active = 0;
-    tun->ch = 0;
+    fclose(get_recording(&h)->fd);
+    memset(get_recording(&h), 0, sizeof(recording_t));
+    get_recording(&h)->fd = NULL;
+    tun = get_tuner(&h);
+    tun->active--;
+    if(tun->active < 1)
+    {
+      printf("Stopping tuner%d\n", h.idx.tun);
+      hdhr_device = hdhomerun_device_create(tun->device_id, 0, tun->index, NULL);
+      hdhomerun_device_set_tuner_channel(hdhr_device, "none");
+      hdhomerun_device_set_tuner_target(hdhr_device, "none");
+      hdhomerun_device_destroy(hdhr_device);
+      
+      tun->active = 0;
+      tun->ch = 0;
+    }    
   }
   
   Py_RETURN_NONE;

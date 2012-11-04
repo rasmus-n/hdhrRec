@@ -6,6 +6,7 @@ import urllib
 import sqlite3 as sql
 from datetime import datetime, timedelta
 from time import sleep
+from sys import stderr
 
 db = sql.connect('tv.sqlite')
 
