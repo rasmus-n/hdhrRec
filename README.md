@@ -13,8 +13,8 @@ The alix3d2 is a single board computer with a 500MHz CPU and 256MB of RAM, it ha
 The purpose of this project is to provide a relatively simple, lightweight, automatic recording scheduler for HDHomeRun devices, suitable for running headless on low power hardware.
 
 The primary interfaces are:
-1. A web interface for status and management of recording rules and recording profiles.
-2. The file system, so recordings can be shared / managed etc. by general purpose tools.
+* A web interface for status and management of recording rules and recording profiles.
+* The file system, so recordings can be shared / managed etc. by general purpose tools.
 
 ## Motivation
 In the past I have used MythTV with MythWeb and later TVHeadend.
