@@ -4,7 +4,7 @@ $def with (form, id)
 function del()
 {
   var form = document.getElementById('edit');
-  form.action = '/rules/delete/$id';
+  form.action = '/profiles/delete/$id';
   form.submit();
 }
 </script>
@@ -13,6 +13,6 @@ function del()
   $for input in form.inputs:
     <div><span class='table_cell_small'>$input.description</span> $:input.render()</div>
   </p>  
-  <input type='submit' value='Update rule'>
-  <input type='button' value='Delete rule' onclick='del()'>
+  <input type='submit' value='Update profile'>
+  <input type='button' value='Delete profile' onclick='del()'>
 </form>

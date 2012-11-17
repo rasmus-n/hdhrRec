@@ -1,5 +1,5 @@
 $def with (channels)
-
+<p>
   <span class='table_head'>
     <span class='table_cell_small'>Name</span>
     <span class='table_cell_small'>Channel</span>
@@ -9,7 +9,7 @@ $def with (channels)
     <span class='table_cell_small'>PID</span>
   </span><br>
 $for channel in channels:
-  <span class='table_row' onclick="location.href='/streams/$channel['rowid']'">
+  <span class='table_row' onclick="location.href='/streams/edit/$channel['rowid']'">
   <span class='table_cell_small'>$channel['name']</span>
   <span class='table_cell_small'>$channel['mux']</span>
   <span class='table_cell_small'>$channel['video']</span>
@@ -17,3 +17,7 @@ $for channel in channels:
   <span class='table_cell_small'>$channel['subtitles']</span>
   <span class='table_cell_small'>$channel['pid']</span>
   </span><br>
+</p>
+<p>
+  <input type='button' value='Add stream' onclick="location.href='/streams/add'">
+</p>
