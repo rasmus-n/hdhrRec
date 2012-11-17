@@ -77,14 +77,14 @@ def my_callback():
       print "End recording: %s" % (p['program_title'])
       hdhr.stop(p['id'])
       db.execute('DELETE FROM recordings WHERE (id=?)', (p['id'],))
-      db.commit()
+    db.commit()
   except Exception:
     print "Error A: %s" % (now_str)
     print traceback.format_exc()
 
   r = []
   try:
-    r = db.execute('SELECT recordings.rowid,* FROM recordings,channels,profiles WHERE (recordings.channel_name=channels.name) AND (recordings.profile_name = profiles.name) AND (program_start < ?) AND (program_end > ?) AND (id ISNULL)', (now_str,now_str))
+    r = db.execute('SELECT recordings.rowid,* FROM recordings,channels,profiles WHERE (recordings.channel_name=channels.name) AND (recordings.profile_name = profiles.name) AND (program_start < ?) AND (program_end > ?) AND (id ISNULL)', (now_str, now_str))
     for p in r:
       print "Start recording: %s" % p['program_title']
       file_path = "%s/%s" % (video_root, p['format'])
@@ -94,7 +94,7 @@ def my_callback():
 
       record_id = hdhr.record(p['mux'], p['video'], p['audio'], p['subtitles'], p['pid'], file_path.encode(code))
       db.execute('UPDATE recordings SET id=? WHERE rowid=?', (record_id,p['rowid']))
-      db.commit()
+    db.commit()
       
   except Exception:
     print "Error B: %s" % (now_str)
