@@ -99,7 +99,6 @@ def my_callback():
   except Exception:
     print "Error B: %s" % (now_str)
     print traceback.format_exc()
-    Popen('./db_tools/dump_rec.py')
     
       
 hdhr.set_recorder_ip(ip)
