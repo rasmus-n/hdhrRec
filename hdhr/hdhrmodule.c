@@ -277,6 +277,7 @@ hdhr_run(PyObject *self, PyObject *args)
 void handlePacket(handle_t *h, uint8_t *data)
 {
   int pid;
+  int tei, scrambled, af_reserved;
   handle_t lh;
   prgcfg_t *cfg;
   recording_t *rec;
@@ -286,6 +287,14 @@ void handlePacket(handle_t *h, uint8_t *data)
   if (data[0] == 0x47)
   {
     pid = ((data[1] & 0x1f) << 8) + data[2];
+    
+    tei = ((data[1] & 0x80) != 0);
+    scrambled = ((data[3] & 0xc0) != 0);
+    af_reserved = ((data[3] & 0x30) == 0);
+    if (tei || scrambled || af_reserved)
+    {
+      return;
+    }
     //printf("%d\n", pid);
     for (lh.idx.rec=0; lh.idx.rec < RECORDINGS_PER_TUNER; lh.idx.rec++)
     {
