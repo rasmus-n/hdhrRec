@@ -36,6 +36,17 @@ Compared to MythTV, I really like TVHeadend, but stopped using it because:
 * Should handle multiple HDHomeRun devices (not tested).
 * Web interface shows what will be recorded and allows modification of rules and profiles.
 
+## Screenshots
+Some example views of the web interface
+### Rules
+![Rules](https://raw.github.com/rasmus-n/hdhrRec/master/screenshots/rules.png)
+### Recordings
+![Recordings](https://raw.github.com/rasmus-n/hdhrRec/master/screenshots/recordings.png)
+### Profiles
+![Profiles](https://raw.github.com/rasmus-n/hdhrRec/master/screenshots/profiles.png)
+### Streams
+![Streams](https://raw.github.com/rasmus-n/hdhrRec/master/screenshots/streams.png)
+
 ## Operational concept
 
 * The rule table can at any time be modified via the web interface.
