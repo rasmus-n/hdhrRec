@@ -89,8 +89,8 @@ for channel in channels:
       
 #    db.execute('DELETE FROM programs WHERE (channel_name=?) AND (start > ?)', (channel,now))
 #    s = "INSERT INTO programs(channel_name, title, start, end, description"
-    db.executemany('DELETE FROM programs WHERE (channel_name=?) AND (start < ?) AND (end > ?)', dbdata_start)
-    db.executemany('DELETE FROM programs WHERE (channel_name=?) AND (start < ?) AND (end > ?)', dbdata_end)
+    db.executemany('DELETE FROM programs WHERE (channel_name=?) AND (start <= ?) AND (end >= ?)', dbdata_start)
+    db.executemany('DELETE FROM programs WHERE (channel_name=?) AND (start <= ?) AND (end >= ?)', dbdata_end)
     db.executemany('INSERT INTO programs(channel_name, title, start, end, description) VALUES (?, ?, ?, ?, ?)', dbdata)
     db.commit()
     
