@@ -6,9 +6,9 @@ import urllib
 import sqlite3 as sql
 from datetime import datetime, timedelta
 from time import sleep
-from sys import stderr
+from sys import stderr, argv
 
-db = sql.connect('tv.sqlite')
+db = sql.connect(argv[1])
 
 channelMap = {
 'DR1'       : ('DR1',"w_"),

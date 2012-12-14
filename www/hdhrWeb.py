@@ -7,9 +7,19 @@ code = locale.getpreferredencoding()
 import web
 from web import form
 from datetime import datetime
+from ConfigParser import SafeConfigParser as ConfigParser
+from os import fork, chdir, setsid, umask, getpid, close, dup2, O_RDWR
+from os import open as os_open
 
-render = web.template.render('templates/', base='layout')
-db = web.database(dbn='sqlite', db='../tv.sqlite')
+cp = ConfigParser()
+cp.read("/home/rn/src/hdhrRec/hdhrRec.ini")
+db_path   =  cp.get("scheduler" , "db")
+templates =  cp.get("http"      , "templates")
+pid_file  =  cp.get("http"      , "pid")
+del cp
+
+render = web.template.render(templates, base='layout')
+db = web.database(dbn='sqlite', db=db_path)
 
 rule_form = form.Form (
   form.Textbox('name', description='Name'),
@@ -214,6 +224,37 @@ class rec_edit:
 app = web.application(urls, globals())
 
 if __name__ == "__main__":
+  if (True):
+    try:
+      pid = fork()
+      if pid > 0:
+        exit(0)
+    except OSError, e:
+      exit(1)
+      
+    chdir("/")
+    setsid()
+    umask(0)
+    
+    try:
+      pid = fork()
+      if pid > 0:
+        exit(0)
+    except OSError, e:
+      exit(1)
+      
+    close(0)  
+    close(1)
+    close(2)
+      
+    os_open("/dev/null", O_RDWR)
+    dup2(0,1)
+    dup2(0,2)
+    
+  pf = open(pid_file, "w")
+  pf.write(str(getpid()))
+  pf.close()
+  del pf
   app.run() 
 else:
   application = app.wsgifunc()

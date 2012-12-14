@@ -3,6 +3,7 @@
 
 import sqlite3 as sql
 from datetime import datetime, timedelta
+from sys import argv
 
 def dict_factory(cursor, row):
   d = {}
@@ -11,7 +12,7 @@ def dict_factory(cursor, row):
       d[col[0]] = row[idx]
   return d
 
-db = sql.connect('tv.sqlite')
+db = sql.connect(argv[1])
 db.row_factory = dict_factory
 
 now = datetime.now()

@@ -11,25 +11,8 @@ from datetime import datetime, timedelta
 from subprocess import Popen
 import traceback
 from ConfigParser import SafeConfigParser as ConfigParser
-
-try:
-  cp = ConfigParser()
-  cp.read("hdhrRec.ini")
-  video_root =  cp.get("recorder" , "path")
-  ip         =  cp.get("recorder" , "ip")
-  tuners_raw =  cp.get("tuner"    , "id").split()
-  
-  tuners=[]
-  for tuner in tuners_raw:
-    tuners.append(int(tuner, 16))
-    
-  del cp
-  del tuners_raw
-    
-except:
-  print traceback.format_exc()
-  exit(-1)
-
+from logging import info, warning, error
+from os import fork, chdir, setsid, umask, getpid, close, open as os_open, dup2, O_RDWR
 
 def dict_factory(cursor, row):
   d = {}
@@ -38,12 +21,6 @@ def dict_factory(cursor, row):
       d[col[0]] = row[idx]
   return d
 
-db = sql.connect('tv.sqlite')
-db.row_factory = dict_factory
-
-db.execute('UPDATE recordings SET id=NULL')
-db.execute('DELETE FROM recordings WHERE (program_end < ?)', (datetime.now(),))
-db.commit()
 
 def my_callback():
   now = datetime.now()
@@ -54,7 +31,7 @@ def my_callback():
   
   if table_update_times['programs'] < str(now - timedelta(hours=12)):
     print "Updating program table..."
-    Popen('./db_tools/tvdb.py')
+    Popen([tvdb_script, db_path])
     
   if table_update_times['programs'] > table_update_times['recordings']:
     print "Program table updated"
@@ -66,7 +43,7 @@ def my_callback():
 
   if update_rec:
     print "Updating recording table"
-    Popen('./db_tools/recdb.py')
+    Popen([recdb_script, db_path])
     db.execute('UPDATE table_update_times SET recordings=?', (now_str,))
     db.commit()
    
@@ -99,14 +76,76 @@ def my_callback():
   except Exception:
     print "Error B: %s" % (now_str)
     print traceback.format_exc()
+
+
+if __name__ == "__main__":
+  try:
+    cp = ConfigParser()
+    cp.read("/home/rn/src/hdhrRec/hdhrRec.ini")
+    video_root    =  cp.get("recorder" , "path")
+    ip            =  cp.get("recorder" , "ip")
+    tuners_raw    =  cp.get("tuner"    , "id").split()
+    db_path       =  cp.get("scheduler", "db")
+    tvdb_script   =  cp.get("scheduler", "tv")
+    recdb_script  =  cp.get("scheduler", "rec")
+    pid_file      =  cp.get("scheduler", "pid")
     
+    tuners=[]
+    for tuner in tuners_raw:
+      tuners.append(int(tuner, 16))
       
-hdhr.set_recorder_ip(ip)
-for tuner_id in tuners:
-  hdhr.install_tuner(tuner_id, 0)
-  hdhr.install_tuner(tuner_id, 1)
+    del cp
+    del tuners_raw
 
-hdhr.set_callback(my_callback)
+  except:
+    print traceback.format_exc()
+    exit(-1)
 
-hdhr.run()
+  db = sql.connect(db_path)
+  db.row_factory = dict_factory
+
+  db.execute('UPDATE recordings SET id=NULL')
+  db.execute('DELETE FROM recordings WHERE (program_end < ?)', (datetime.now(),))
+  db.commit()
+
+  hdhr.set_recorder_ip(ip)
+  for tuner_id in tuners:
+    hdhr.install_tuner(tuner_id, 0)
+    hdhr.install_tuner(tuner_id, 1)
+
+  hdhr.set_callback(my_callback)
+  
+  if (True):
+    try:
+      pid = fork()
+      if pid > 0:
+        exit(0)
+    except OSError, e:
+      exit(1)
+      
+    chdir("/")
+    setsid()
+    umask(0)
+    
+    try:
+      pid = fork()
+      if pid > 0:
+        exit(0)
+    except OSError, e:
+      exit(1)
+    
+    close(0)
+    close(1)
+    close(2)
+    
+    os_open("/dev/null", O_RDWR)
+    dup2(0,1)
+    dup2(0,2)
+    
+  pf = open(pid_file, 'w')
+  pf.write(str(getpid()))
+  pf.close()
+  del pf
+  
+  hdhr.run()
 #~ my_callback()
