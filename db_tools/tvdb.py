@@ -13,18 +13,22 @@ db = sql.connect(argv[1])
 channelMap = {
 'DR1'       : ('DR1',"w_"),
 'DR2'       : ('DR2',"w_"),
-'DRK'       : ('TVK',"w_"),
-'Ramasjang' : ('TVR',"w_"),
-'DRHD'      : ('TVH',"w_"),
-'TV2OJ'     : ('r371',"r_"),
+'TV2'       : ('td2',"r_"),
+'TV2News'   : ('tws',"r_"),
+'TV2Zulu'   : ('t2z',"r_"),
+'TV3'       : ('dk3',"r_"),
+'TV3Plus'   : ('r382',"r_"),
+'Kanal5'    : ('999',"r_"),
+'6eren'     : ('snt',"r_"),
+'BBCE'      : ('bbp',"r_"),
 }
 
 dateFormatDR = "%Y-%m-%dT%H:%M:%S"
 
 #db.execute("CREATE TABLE plan (ch text, st datetime, et datetime, title text, subtitle text, description text)")
 
-#channels = channelMap.keys()
-channels = ('DR1','DR2','DRK','Ramasjang','DRHD','TV2OJ')
+channels = channelMap.keys()
+#channels = ('DR1','DR2','DRK','Ramasjang','DRHD','TV2OJ')
 numberOfDays = 2
 
 now = datetime.now()

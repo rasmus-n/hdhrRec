@@ -12,7 +12,7 @@ from os import fork, chdir, setsid, umask, getpid, close, dup2, O_RDWR
 from os import open as os_open
 
 cp = ConfigParser()
-cp.read("/home/rn/src/hdhrRec/hdhrRec.ini")
+cp.read("/usr/local/etc/hdhrRec.ini")
 db_path   =  cp.get("scheduler" , "db")
 templates =  cp.get("http"      , "templates")
 pid_file  =  cp.get("http"      , "pid")
