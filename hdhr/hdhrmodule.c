@@ -63,7 +63,7 @@ char target_ip[16] = "10.0.0.3";
 
 /* PROTOTYPES */
 
-uint16_t get_available_recorder_handle(prgcfg_t *cfg);
+int16_t get_available_recorder_handle(prgcfg_t *cfg);
 void handlePacket(handle_t *h, uint8_t *data);
 recording_t *get_recording(handle_t *h);
 tuner_t *get_tuner(handle_t *h);
