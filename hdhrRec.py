@@ -44,8 +44,6 @@ def my_callback():
   if update_rec:
     print "Updating recording table"
     Popen([recdb_script, db_path])
-    db.execute('UPDATE table_update_times SET recordings=?', (now_str,))
-    db.commit()
    
   r = []
   try:

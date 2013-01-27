@@ -28,6 +28,7 @@ for r in m:
   if r['rowid'] in p:
     p[r['rowid']]['weight'] += r['weight']
     if r['weight'] > p[r['rowid']]['rule_weight']:
+      p[r['rowid']]['rule_weight'] = r['weight']
       p[r['rowid']]['profile_name'] = r['profile_name']
 
   else:
@@ -49,8 +50,5 @@ for r in p:
     elif l > 1:
       print 'Error!'
 
+db.execute('UPDATE table_update_times SET recordings=?', (now_str,))
 db.commit()
-
-
-#~ p[r['rowid']]['start'] = datetime.strptime(r['start'], "%Y-%m-%d %H:%M:%S") - timedelta(minutes=r['pre_record'])
-#~ p[r['rowid']]['end'] = datetime.strptime(r['end'], "%Y-%m-%d %H:%M:%S") + timedelta(minutes=r['post_record'])
