@@ -79,7 +79,7 @@ def my_callback():
 if __name__ == "__main__":
   try:
     cp = ConfigParser()
-    cp.read("/home/rn/src/hdhrRec/hdhrRec.ini")
+    cp.read("/usr/local/etc/hdhrRec.ini")
     video_root    =  cp.get("recorder" , "path")
     ip            =  cp.get("recorder" , "ip")
     tuners_raw    =  cp.get("tuner"    , "id").split()

@@ -36,7 +36,7 @@ struct index_bf{
 
 typedef union handle_t{
   struct index_bf idx;
-  uint16_t id;
+  int16_t id;
 }handle_t;
 
 typedef struct recording_t{
@@ -159,7 +159,7 @@ hdhr_record(PyObject *self, PyObject *args)
   get_recording(&h)->fd = fopen(filename, "wb");
   get_tuner(&h)->active++;
 //  printf("act: %d\n", get_tuner(&h)->active);
-  return Py_BuildValue("H", h.id);
+  return Py_BuildValue("h", h.id);
 }
 
 static PyObject *
@@ -169,12 +169,12 @@ hdhr_stop(PyObject *self, PyObject *args)
   tuner_t *tun;
   struct hdhomerun_device_t *hdhr_device;
 
-  if (!PyArg_ParseTuple(args, "H", &h.id))
+  if (!PyArg_ParseTuple(args, "h", &h.id))
   {
     return NULL;
   }
 
-  if (get_recording(&h)->fd != NULL)
+  if ((h.id >= 0) && (get_recording(&h)->fd != NULL))
   {
     fclose(get_recording(&h)->fd);
     memset(get_recording(&h), 0, sizeof(recording_t));
@@ -313,7 +313,7 @@ void handlePacket(handle_t *h, uint8_t *data)
   }
 }
 
-uint16_t get_available_recorder_handle(prgcfg_t *cfg)
+int16_t get_available_recorder_handle(prgcfg_t *cfg)
 {
   handle_t h;
   tuner_t *tun;
