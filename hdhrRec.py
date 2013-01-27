@@ -29,7 +29,7 @@ def my_callback():
   table_update_times = db.execute('SELECT * FROM table_update_times').fetchone()
   update_rec = False
   
-  if table_update_times['programs'] < str(now - timedelta(hours=12)):
+  if table_update_times['programs'] < str(now - timedelta(hours=6)):
     print "Updating program table..."
     Popen([tvdb_script, db_path])
     
@@ -49,7 +49,7 @@ def my_callback():
   try:
     r = db.execute('SELECT id,program_title FROM recordings WHERE (program_end < ?) AND (id NOTNULL)', (now_str,))
     for p in r:
-      print "End recording: %s" % (p['program_title'])
+      print "End recording: %s" % (p['program_title']).encode(code)
       hdhr.stop(p['id'])
       db.execute('DELETE FROM recordings WHERE (id=?)', (p['id'],))
     db.commit()
@@ -61,7 +61,7 @@ def my_callback():
   try:
     r = db.execute('SELECT recordings.rowid,* FROM recordings,channels,profiles WHERE (recordings.channel_name=channels.name) AND (recordings.profile_name = profiles.name) AND (program_start < ?) AND (program_end > ?) AND (id ISNULL)', (now_str, now_str))
     for p in r:
-      print "Start recording: %s" % p['program_title']
+      print "Start recording: %s" % p['program_title'].encode(code)
       file_path = "%s/%s" % (video_root, p['format'])
       file_path = file_path.replace('\\title', p['program_title'])
       file_path = file_path.replace('\date', now.strftime("%Y-%m-%d"))
