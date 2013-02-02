@@ -1,0 +1,18 @@
+$def with (plan)
+
+<p>
+$for ch in plan:
+  <p>
+  $ch<br>
+  <span class='table_head'>
+    <span class='table_cell'>Time</span>
+    <span class='table_cell_wide'>Title</span>
+  </span><br>
+  
+  $for program in plan[ch]:
+    <span class='table_row' onclick="location.href='/now_add/$program['rowid']'">
+      <span class='table_cell'>$program['start'][11:16] - $program['end'][11:16]</span>
+      <span class='table_cell_wide'>$program['title']</span>
+    </span><br>
+  </p>
+</p>

@@ -50,5 +50,5 @@ for r in p:
     elif l > 1:
       print 'Error!'
 
-db.execute('UPDATE table_update_times SET recordings=?', (now_str,))
+db.execute('UPDATE table_update_times SET recordings=?', (now,))
 db.commit()

@@ -14,6 +14,8 @@ from ConfigParser import SafeConfigParser as ConfigParser
 from logging import info, warning, error
 from os import fork, chdir, setsid, umask, getpid, close, open as os_open, dup2, O_RDWR
 
+update_program = True
+
 def dict_factory(cursor, row):
   d = {}
   for idx, col in enumerate(cursor.description):
@@ -28,14 +30,17 @@ def my_callback():
 
   table_update_times = db.execute('SELECT * FROM table_update_times').fetchone()
   update_rec = False
+
   
-  if table_update_times['programs'] < str(now - timedelta(hours=6)):
+  if update_program and (table_update_times['programs'] < str(now - timedelta(hours=6))):
     print "Updating program table..."
+    update_program = False
     Popen([tvdb_script, db_path])
     
   if table_update_times['programs'] > table_update_times['recordings']:
     print "Program table updated"
-    update_rec = True 
+    update_rec = True
+    update_program = True
     
   if table_update_times['rules'] > table_update_times['recordings']:
     print "Rule table updated"

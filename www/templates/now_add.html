@@ -1,0 +1,8 @@
+$def with (form)
+<form method='POST'>
+  <p>
+  $for input in form.inputs:
+    <div><span class='table_cell_small'>$input.description</span> $:input.render()</div>
+  </p>  
+  <input type='submit' value='Add recording'>
+</form>
