@@ -17,7 +17,7 @@ db_path   =  cp.get("scheduler" , "db")
 templates =  cp.get("http"      , "templates")
 pid_file  =  cp.get("http"      , "pid")
 del cp
-print templates
+
 render = web.template.render(templates, base='layout')
 db = web.database(dbn='sqlite', db=db_path)
 
@@ -111,7 +111,13 @@ class now_add:
   def POST(self, program_nr):
     f = rec_form()
     if f.validates():
-      db.insert('recordings', **f.d)
+      d = dict(name = f.d['profile_name'])
+      profile = db.select('profiles', d, where='name = $name')[0]
+      recording = f.d
+      recording['program_start'] = datetime.strptime(str(f.d['program_start']), "%Y-%m-%d %H:%M:%S") - timedelta(minutes=int(profile['pre_record']))
+      recording['program_end'] = datetime.strptime(str(f.d['program_end']), "%Y-%m-%d %H:%M:%S") + timedelta(minutes=int(profile['post_record']))
+
+      db.insert('recordings', **recording)
       raise web.seeother('/now')
     else:
       return render.now_add(f)    

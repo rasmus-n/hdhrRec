@@ -27,10 +27,10 @@ def dict_factory(cursor, row):
 def my_callback():
   now = datetime.now()
   now_str = str(now)[:19]
+  global update_program
 
   table_update_times = db.execute('SELECT * FROM table_update_times').fetchone()
   update_rec = False
-
   
   if update_program and (table_update_times['programs'] < str(now - timedelta(hours=6))):
     print "Updating program table..."
