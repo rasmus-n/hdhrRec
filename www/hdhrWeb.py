@@ -6,9 +6,9 @@ code = locale.getpreferredencoding()
 
 import web
 from web import form
-from datetime import datetime
+from datetime import datetime, timedelta
 from ConfigParser import SafeConfigParser as ConfigParser
-from os import fork, chdir, setsid, umask, getpid, close, dup2, O_RDWR
+from os import fork, chdir, setsid, umask, getpid, close, dup2, O_RDWR, getcwd
 from os import open as os_open
 
 cp = ConfigParser()
@@ -17,7 +17,7 @@ db_path   =  cp.get("scheduler" , "db")
 templates =  cp.get("http"      , "templates")
 pid_file  =  cp.get("http"      , "pid")
 del cp
-
+print templates
 render = web.template.render(templates, base='layout')
 db = web.database(dbn='sqlite', db=db_path)
 
@@ -46,8 +46,18 @@ stream_form = form.Form (
   form.Textbox('subtitles', description='SID'),
 )
 
+rec_form = form.Form (
+  form.Textbox('channel_name', description='Channel'),
+  form.Textbox('program_title', description='Title'),
+  form.Textbox('profile_name', description='Profile'),
+  form.Textbox('program_start', description='Start'),
+  form.Textbox('program_end', description='End'),
+)
+
 urls = (
   '/'                       , 'start',
+  '/now'                    , 'now',
+  '/now_add/([0-9]+)'       , 'now_add',
   '/streams'                , 'streams',
   '/streams/add'            , 'stream_add',
   '/streams/edit/([0-9]+)'  , 'stream_edit',
@@ -73,6 +83,38 @@ class start:
       d=dict(channel=channel['name'], time=now)
       plan[channel['name']] = db.select("programs", d, where='(channel_name = $channel) AND (end > $time)')
     return render.index(plan)
+
+class now:
+  def GET(self):
+    now = datetime.now()
+    plan = {}
+    channels = db.select('channels', what='name')
+    for channel in channels:
+      d=dict(channel=channel['name'], time_0h=now, time_1h=now+timedelta(hours=1))
+      plan[channel['name']] = db.select("programs", d, where='(channel_name = $channel) AND (((start > $time_0h) AND (start < $time_1h)) OR ((start < $time_0h) AND (end > $time_0h)))', what='rowid,*')
+    return render.now(plan)
+    
+class now_add:
+  def GET(self, program_nr):
+    f = rec_form()
+    d = dict(id = program_nr);
+    program = db.select('programs', d, where='rowid = $id', what='rowid,*')[0]
+    recording = { 'channel_name': program['channel_name'],
+                  'program_title': program['title'],
+                  'profile_name': "default",
+                  'program_start': program['start'],
+                  'program_end': program['end']
+                  }
+    f.fill(recording)
+    return render.now_add(f)
+    
+  def POST(self, program_nr):
+    f = rec_form()
+    if f.validates():
+      db.insert('recordings', **f.d)
+      raise web.seeother('/now')
+    else:
+      return render.now_add(f)    
 
 class streams:
   def GET(self):
@@ -255,6 +297,7 @@ if __name__ == "__main__":
   pf.write(str(getpid()))
   pf.close()
   del pf
+  print getcwd()
   app.run() 
 else:
   application = app.wsgifunc()
